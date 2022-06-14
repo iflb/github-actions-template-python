@@ -1,0 +1,32 @@
+name: hello world
+
+on: 
+  workflow_dispatch:
+  
+jobs:
+  
+  say-hello:
+  
+    env:
+      YOURNAME: iflab
+  
+    runs-on: ubuntu-latest
+  
+    steps:
+      - name: "hello world"
+        run: echo "hello world, $YOURNAME!"
+
+      - name: "test your name"
+        if: env.YOURNAME != 'iflab'
+        run: echo 'YOURNAME=none' >> $GITHUB_ENV
+
+      - name: "hello world, again"
+        run: echo "hello world, $YOURNAME!"
+
+      - name: "update env"
+        if: env.YOURNAME == 'iflab'
+        run: echo 'YOURNAME=teppei' >> $GITHUB_ENV
+
+      - name: "hello world, finally"
+        run: echo 'hello world, ${{ env.YOURNAME }}!'
+
