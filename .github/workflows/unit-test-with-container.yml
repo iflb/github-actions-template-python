@@ -1,0 +1,117 @@
+# ここに設定した名前がActions上に表示される
+name: unit test with container
+
+on:
+  workflow_dispatch:
+
+env:
+    ACT_REDIS_HOST: 172.17.0.2
+    ACT_REDIS_PORT: 6379
+                
+jobs:
+
+  container-job:
+    name: Tasks with a Container
+
+    env:
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+  
+    runs-on: ubuntu-latest
+
+    # 複数の Python のバージョンでテストするために `strategy.matrix` を設定する
+    strategy:
+      matrix:
+        python-version: [3.7]
+
+    services:
+      # Label used to access the service container
+      redis:
+        # Docker Hub image
+        image: redis
+        # Set health checks to wait until redis has started
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+
+      - name: "setenv in act"
+        if: ${{ env.ACT }}
+        run: |
+          echo "REDIS_HOST=$ACT_REDIS_HOST" >> $GITHUB_ENV
+          echo "REDIS_PORT=$ACT_REDIS_PORT" >> $GITHUB_ENV
+
+      # リポジトリをチェックアウトする
+      # See: https://github.com/actions/checkout
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      # Python のランタイムをセットアップする
+      # バージョンは `strategy.matrix` に並べたものを指定する
+      # See: https://github.com/actions/setup-python
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      #----------------------------------------------
+      #  -----  install & configure poetry  -----
+      #----------------------------------------------
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+          installer-parallel: true
+
+      #----------------------------------------------
+      # print poetry version for test
+      #----------------------------------------------
+      - name: print version
+        run: poetry --version
+
+      #----------------------------------------------
+      #       load cached venv if cache exists
+      #----------------------------------------------
+      - name: Load cached venv
+        id: cached-poetry-dependencies
+        uses: actions/cache@v2
+        with:
+          path: .venv
+#          key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
+          key: venv-${{ runner.os }}-${{ matrix.python- }}-${{ hashFiles('**/poetry.lock') }}
+
+      #----------------------------------------------
+      # install dependencies if cache does not exist
+      #----------------------------------------------
+      - name: Install dependencies 
+        if: ${{ steps.cached-poetry-dependencies.outputs.cache-hit != 'true' }}
+        run: poetry install -v --no-interaction --no-root
+        env:
+          LC_ALL: C.UTF-8
+          LANG: C.UTF-8
+          LANGUAGE: C.UTF-8
+
+      # インストールした Poetry を使って必要な Python パッケージをインストールする
+      # 【重要】locale設定しないとエラーとなる
+      #----------------------------------------------
+      # install your root project, if required
+      #----------------------------------------------
+      #- name: Install Dependencies
+      #  run: |
+      #    poetry install --no-interaction -v
+      #  env:
+      #    LC_ALL: C.UTF-8
+      #    LANG: C.UTF-8
+      #    LANGUAGE: C.UTF-8
+
+      #----------------------------------------------
+      # run pytest
+      #----------------------------------------------
+      - name: Run Tests
+        run: poetry run pytest -s
+        env:
+          rediskey: value

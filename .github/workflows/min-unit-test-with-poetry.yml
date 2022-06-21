@@ -72,6 +72,7 @@ jobs:
       # pytest を実行する
       #----------------------------------------------
       - name: Run Tests
-        run: poetry run pytest -s
+        # run: poetry run pytest -s
+        run: poetry run pytest -s tests/test_github_actions_template_python.py
         env:
           testkey: value
