@@ -27,3 +27,8 @@ sudo service docker start
 2. poetry install
 3. poetry run pytest
 4. act
+
+## act w/ Redisコンテナ
+
+1. docker start redis
+2. act -j container-job
