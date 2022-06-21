@@ -9,13 +9,13 @@ template project for python with github actions
 
 ## poetry環境構築
 
-https://qiita.com/ksato9700/items/b893cf1db83605898d8a
-https://cocoatomo.github.io/poetry-ja/basic-usage/
+- https://qiita.com/ksato9700/items/b893cf1db83605898d8a
+- https://cocoatomo.github.io/poetry-ja/basic-usage/
 
 ## act環境構築
 
-https://gauravgahlot.in/blog/run-github-actions-locally-docker-nektos-act/
-https://gauravgahlot.in/blog/run-github-actions-locally-docker-nektos-act/
+- https://gauravgahlot.in/blog/run-github-actions-locally-docker-nektos-act/
+- https://github.com/nektos/act/blob/master/README.md
 
 ## dockerデーモンの起動
 
